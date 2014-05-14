@@ -2,9 +2,9 @@
   "name": "slush-saci-android",
   "version": "0.0.0",
   "description": "scaffold saci for embedding lua in an android app",
-  "main": "index.js",
+  "main": "slushfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,18 @@
   "bugs": {
     "url": "https://github.com/benjamine/slush-saci-android/issues"
   },
-  "homepage": "https://github.com/benjamine/slush-saci-android"
+  "homepage": "https://github.com/benjamine/slush-saci-android",
+  "dependencies": {
+    "gulp": "^3.6.2",
+    "inquirer": "^0.4.1",
+    "gulp-template": "^0.1.1",
+    "gulp-conflict": "^0.1.1",
+    "gulp-rename": "^1.2.0",
+    "gulp-install": "^0.1.5",
+    "underscore.string": "^2.3.3"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "expect.js": "^0.3.1"
+  }
 }
