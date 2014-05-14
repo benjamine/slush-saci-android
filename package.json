@@ -1,6 +1,6 @@
 {
   "name": "slush-saci-android",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "scaffold saci for embedding lua in an android app",
   "main": "slushfile.js",
   "scripts": {
