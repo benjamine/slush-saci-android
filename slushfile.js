@@ -9,12 +9,26 @@
 'use strict';
 
 var gulp = require('gulp'),
+    path = require('path'),
     install = require('gulp-install'),
     conflict = require('gulp-conflict'),
     template = require('gulp-template'),
     rename = require('gulp-rename'),
+    gulpif = require('gulp-if'),
     _ = require('underscore.string'),
     inquirer = require('inquirer');
+
+var binaryFileExtensions = [
+  '.so',
+  '.png', '.jpg', '.gif',
+  '.wav', '.mp3', '.mpg', '.3gp',
+  '.zip', '.tgz', '.bz2', '.gz'
+];
+function isTemplateFile(f) {
+  // don't treat binary files as templates
+  var ext = path.extname(f.name).toLowerCase();
+  return binaryFileExtensions.indexOf(ext) < 0;
+}
 
 gulp.task('default', function (done) {
     var prompts = [{
@@ -38,8 +52,11 @@ gulp.task('default', function (done) {
                 return done();
             }
             answers.appNameSlug = _.slugify(answers.appName);
-            gulp.src(__dirname + '/templates/**')
-                .pipe(template(answers))
+            gulp.src([__dirname + '/templates/**'])
+                .pipe(gulpif(isTemplateFile, template(answers, {
+                  // use only <%= name %> syntax, disabling ES6 interpolate
+                  interpolate: /<%=([\s\S]+?)%>/g
+                })))
                 .pipe(rename(function (file) {
                     if (file.basename[0] === '_') {
                         file.basename = '.' + file.basename.slice(1);
