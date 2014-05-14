@@ -1,0 +1,26 @@
+{
+  "name": "slush-saci-android",
+  "version": "0.0.0",
+  "description": "scaffold saci for embedding lua in an android app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benjamine/slush-saci-android.git"
+  },
+  "keywords": [
+    "slush",
+    "slushgenerator",
+    "lua",
+    "saci",
+    "android"
+  ],
+  "author": "Benjamin Eidelman <beneidel@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benjamine/slush-saci-android/issues"
+  },
+  "homepage": "https://github.com/benjamine/slush-saci-android"
+}
