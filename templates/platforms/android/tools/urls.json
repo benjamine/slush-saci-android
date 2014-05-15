@@ -1,0 +1,10 @@
+{
+  "sdk": {
+    "linux": "http://dl.google.com/android/android-sdk_r22.6.2-linux.tgz",
+    "darwin": "http://dl.google.com/android/android-sdk_r22.6.2-macosx.zip"
+  },
+  "ndk": {
+    "linux": "http://dl.google.com/android/ndk/android-ndk-r9c-linux-x86.tar.bz2",
+    "darwin": "http://dl.google.com/android/ndk/android-ndk-r9d-darwin-x86_64.tar.bz2"
+  }
+}
