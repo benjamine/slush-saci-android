@@ -6,38 +6,50 @@ var urls = require('./urls.json');
 var fileutil = require('./fileutil');
 var download = fileutil.download;
 
+var toolsDir = __dirname;
 var downloadDir = path.join(__dirname, 'downloads');
 
-function installSDK(done) {
-  download(urls.sdk[platform], {
+function downloadAndExtract(url, extractPath, done) {
+  download(url, {
     targetPath: downloadDir
   }, function(err, filename){
     if (err) {
       done(err);
       return;
     }
-    console.log('extracting ', filename);
-    fileutil.extract(filename, null, function(err, outputPath) {
+    fileutil.extract(filename, {
+      extractPath: extractPath
+    }, function(err, outputPath) {
       if (err) {
         done(err);
         return;
       }
-      var sdkPath = outputPath;
-      console.log('SDK extracted to', sdkPath);
-      done(sdkPath);
+      done(null, outputPath);
     });
   });
 }
 
-function installNDK(done) {
-  download(urls.ndk[platform], {
-    targetPath: downloadDir
-  }, function(err, filename){
+function installSDK(done) {
+  downloadAndExtract(urls.sdk[platform],
+    path.join(toolsDir, 'android-sdk'), function(err, sdkPath) {
     if (err) {
       done(err);
       return;
     }
-    done();
+    console.log('SDK ready at', sdkPath);
+    done(null, sdkPath);
+  });
+}
+
+function installNDK(done) {
+  downloadAndExtract(urls.ndk[platform],
+    path.join(toolsDir, 'android-ndk'), function(err, ndkPath) {
+    if (err) {
+      done(err);
+      return;
+    }
+    console.log('NDK ready at', ndkPath);
+    done(null, ndkPath);
   });
 }
 
@@ -60,7 +72,9 @@ function install(done) {
 install(function(err){
   if (err) {
     console.error(err);
-    console.error(err.stack);
+    if (err.stack) {
+      console.error(err.stack);
+    }
     return;
   }
   console.log('installation complete!');

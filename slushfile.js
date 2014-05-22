@@ -35,7 +35,7 @@ gulp.task('default', function (done) {
         type: 'input',
         name: 'appName',
         message: 'What is the name of your app?',
-        default: gulp.args.join(' ')
+        default: gulp.args.join(' ') || path.basename(path.resolve('.'))
     }, {
         type: 'input',
         name: 'appDescription',

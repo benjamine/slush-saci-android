@@ -2,6 +2,7 @@ var fs = require('fs');
 var os = require('os');
 var path = require('path');
 var http = require('http');
+var child_process = require('child_process');
 
 var platform = os.platform();
 var urls = require('./urls.json');
@@ -98,21 +99,81 @@ function download(url, options, done) {
   }
 }
 
-function extract(filename, extractPath, done) {
+function removeExtractedTopFolder(extractPath, options, done) {
+  var contents = fs.readdirSync(extractPath);
+  if (contents.length === 1 &&
+    fs.statSync(path.join(extractPath, contents[0])).isDirectory() &&
+    options.removeTopFolder !== false) {
+    // remove the top folder, moving the inner folder up
+    fs.renameSync(path.join(extractPath, contents[0]), extractPath + '_tmp');
+    fs.rmdirSync(extractPath);
+    fs.renameSync(extractPath + '_tmp', extractPath);
+  }
+  done(null, extractPath);
+}
+
+function extractZip(filename, outputPath, options, done) {
+  var AdmZip = require('adm-zip');
+  var zip = new AdmZip(filename);
+  zip.extractAllTo(outputPath, false);
+  removeExtractedTopFolder(outputPath, options, done);
+}
+
+function extractBz2(filename, outputPath, options, done) {
+  // extract spawning child process
+  var commandName = 'tar';
+  mkdir(outputPath);
+  var child = child_process.spawn(commandName, [
+    '-xjf', filename, '-C', outputPath
+    ]);
+  child.stdout.on('data', function (data) {
+    console.log(commandName + '> ' + data);
+  });
+  child.stderr.on('data', function (data) {
+    console.log(commandName + '> ' + data);
+  });
+  child.on('close', function (code) {
+    if (code !== 0) {
+      done(new Error(commandName + ' exited with code ' + code));
+      return;
+    }
+    removeExtractedTopFolder(outputPath, options, done);
+  });
+}
+
+function extract(filename, options, done) {
   try {
     var extname = path.extname(filename);
-    var outputPath = extractPath || path.join(path.dirname(filename), path.basename(filename, extname));
+    options = options || {};
+    if (typeof options === 'string') {
+      options = {
+        extractPath: options
+      };
+    }
+    var outputPath = options.extractPath || path.join(path.dirname(filename),
+      options.extractFolderName || path.basename(filename, extname));
+    if (outputPath.slice(-4).toLowerCase() === '.tar') {
+      outputPath = outputPath.slice(0, -4);
+    }
     if (fs.existsSync(outputPath)) {
-      throw new Error('extract path already exists: ' + outputPath);
+      if (fs.statSync(outputPath).ctime.getTime() < fs.statSync(filename).ctime.getTime()) {
+        throw new Error('extract path already exists: ' + outputPath);
+      } else {
+        done(null, outputPath);
+        return;
+      }
     }
     extname = extname.toLowerCase();
-    if (extname !== '.zip') {
-      throw new Error('unsupported archive type: ' + extname);
+    console.log('decompressing...');
+    if (extname === '.zip') {
+      extractZip(filename, outputPath, options, done);
+      return;
     }
-    var AdmZip = require('adm-zip');
-    var zip = new AdmZip(filename);
-    zip.extractAllTo(outputPath, false);
-    done(null, outputPath);
+    if (extname === '.bz2') {
+      extractBz2(filename, outputPath, options, done);
+      return;
+    }
+    throw new Error('unsupported archive type: ' + extname);
   } catch(err) {
     done(err);
   }
